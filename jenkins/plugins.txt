@@ -1,0 +1,4 @@
+workflow-aggregator:2.6
+credentials:2.5
+git:4.9.0
+pipeline-github-lib:1.0
