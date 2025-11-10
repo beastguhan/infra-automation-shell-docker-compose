@@ -2,10 +2,10 @@ version: "3.9"
 
 services:
   sample-app:
-    build: ./app
+    build: .
     container_name: sample-app
     ports:
-      - "5001:5000"
+      - "5001:5001"
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
