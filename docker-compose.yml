@@ -1,12 +1,14 @@
 version: "3.9"
 
 services:
-  # Flask App
   sample-app:
     build: ./app
     container_name: sample-app
     ports:
       - "5001:5000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
@@ -15,7 +17,6 @@ services:
     depends_on:
       - redis
 
-  # Redis Cache
   redis:
     image: redis:alpine
     container_name: redis
@@ -27,7 +28,6 @@ services:
       timeout: 10s
       retries: 5
 
-  # Jenkins
   jenkins:
     image: jenkins/jenkins:lts
     container_name: jenkins
@@ -43,7 +43,6 @@ services:
       timeout: 10s
       retries: 5
 
-  # Nginx Reverse Proxy
   nginx:
     image: nginx:latest
     container_name: nginx
