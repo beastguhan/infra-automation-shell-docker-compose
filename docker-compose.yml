@@ -1,24 +1,21 @@
 version: "3.9"
 
 services:
-  app:
+  # Flask App
+  sample-app:
     build: ./app
     container_name: sample-app
     ports:
-      - "5001:5001"
-    depends_on:
-      - redis
-    environment:
-      - FLASK_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - "5001:5000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
       timeout: 10s
-      retries: 3
-    restart: always
+      retries: 5
+    depends_on:
+      - redis
 
+  # Redis Cache
   redis:
     image: redis:alpine
     container_name: redis
@@ -28,25 +25,9 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 10s
-      retries: 3
-    restart: always
+      retries: 5
 
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - app
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: always
-
+  # Jenkins
   jenkins:
     image: jenkins/jenkins:lts
     container_name: jenkins
@@ -56,13 +37,27 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
-      interval: 60s
+      interval: 30s
       timeout: 10s
-      retries: 3
-    restart: always
+      retries: 5
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - sample-app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 volumes:
   jenkins_home:
